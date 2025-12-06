@@ -8,6 +8,7 @@ export interface Message {
     content: string;
     timestamp: number;
     isPrivate?: boolean; // For facilitator-user whispers
+    isHandled?: boolean; // Track if the processed by the system
 }
 
 export interface Persona {
@@ -54,6 +55,7 @@ export interface DebateState {
     updateProviderConfig: (provider: LLMProvider, config: Partial<LLMConfig>) => void;
     setStatus: (status: DebateState['status']) => void;
     addMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void;
+    markMessageHandled: (id: string) => void;
     updatePersona: (role: 'expertA' | 'expertB' | 'facilitator', data: Partial<Persona>) => void;
     clearMessages: () => void;
     resetSession: () => void;
@@ -110,6 +112,12 @@ export const useDebateStore = create<DebateState>()(
                         timestamp: Date.now()
                     }
                 ]
+            })),
+
+            markMessageHandled: (id) => set((state) => ({
+                messages: state.messages.map(msg =>
+                    msg.id === id ? { ...msg, isHandled: true } : msg
+                )
             })),
 
             updatePersona: (role, data) => set((state) => ({

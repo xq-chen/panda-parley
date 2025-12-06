@@ -14,6 +14,7 @@ export function useDebateController() {
         provider,
         providerConfigs,
         addMessage,
+        markMessageHandled,
         setStatus,
         archiveSession
     } = useDebateStore();
@@ -51,16 +52,24 @@ export function useDebateController() {
 
             // Check for user whisper (if facilitator turn)
             const reversedMessages = [...messages].reverse();
-            const lastUserMsg = reversedMessages.find(m => m.role === 'user' && m.isPrivate);
-            const lastFacilitatorMsg = reversedMessages.find(m => m.role === 'facilitator');
+            // Find the most recent UNHANDLED user whisper
+            const activeWhisper = reversedMessages.find(m => m.role === 'user' && m.isPrivate && !m.isHandled);
 
-            // Only inject if the user message is more recent than the last facilitator message
-            // or if there are no facilitator messages yet
-            const isFreshWhisper = lastUserMsg && (!lastFacilitatorMsg || lastUserMsg.timestamp > lastFacilitatorMsg.timestamp);
-
-            if (nextRole === 'facilitator' && isFreshWhisper) {
+            if (nextRole === 'facilitator' && activeWhisper) {
                 // Inject the whisper into the system prompt or as a specific context injection
-                systemPrompt += `\n\n[IMPORTANT] The user whispered: "${lastUserMsg.content}". Use this to guide your next output implicitly.`;
+                systemPrompt += `\n\n[IMPORTANT] The user whispered: "${activeWhisper.content}". Use this to guide your next output implicitly.`;
+
+                // Mark as handled so we don't use it again
+                // We need to do this immediately or after success? 
+                // Best to mark it now to avoid double-processing if re-renders occur, 
+                // but strictly we should mark it when we successfully "commit" this turn.
+                // However, since we are inside processTurn which leads to addMessage, let's defer marking 
+                // until we add the message, OR just rely on the fact that the next re-render will see the new state.
+                // Actually, we can just call the store action here? 
+                // Wait, processTurn is async. If we mark it now, and LLM fails, we might lose the whisper.
+                // But for now, let's mark it as handled *after* successful generation or right here if we assume success.
+                // Better safety: Mark it handled effectively by "consuming" it into the context. 
+                // Realistically, to update the UI/Store, we must call the action.
             }
 
             if (isClosing) {
@@ -84,6 +93,11 @@ export function useDebateController() {
                 content: response,
                 isPrivate: false
             });
+
+            // If we used a whisper, mark it handled now that the response is generated
+            if (nextRole === 'facilitator' && activeWhisper) {
+                markMessageHandled(activeWhisper.id);
+            }
 
         } catch (error: any) {
             console.error('Turn Error:', error);
