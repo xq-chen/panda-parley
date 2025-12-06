@@ -27,6 +27,7 @@ export function useDebateController() {
     const llm = new LLMService(activeConfig, provider);
 
     const processTurn = useCallback(async (nextRole: 'expertA' | 'expertB' | 'facilitator', isClosing: boolean = false) => {
+        turnCount.current += 1; // Increment turn count for every turn processed
         if (!activeConfig.apiKey && provider === 'gemini') {
             setStatus('error');
             addMessage({ role: 'facilitator', content: 'System: API Key missing. Please configure settings.' });
@@ -43,7 +44,7 @@ export function useDebateController() {
             const historyText = formatContext(recentMessages);
 
             if (nextRole === 'facilitator') {
-                systemPrompt = SYSTEM_PROMPTS.facilitator(personas.facilitator, personas.expertA, personas.expertB, topic, language);
+                systemPrompt = SYSTEM_PROMPTS.facilitator(personas.facilitator, personas.expertA, personas.expertB, topic, language, turnCount.current);
             } else if (nextRole === 'expertA') {
                 systemPrompt = SYSTEM_PROMPTS.expert(personas.expertA, topic, personas.expertB.name, language);
             } else {
@@ -87,16 +88,30 @@ export function useDebateController() {
                 archiveSession();
             }
 
-            // 3. Update State
+            // 3. Check for specific control tags
+            let finalContent = response;
+            let shouldConclude = false;
+
+            if (nextRole === 'facilitator' && response.includes('[CONCLUDED]')) {
+                shouldConclude = true;
+                finalContent = response.replace('[CONCLUDED]', '').trim();
+            }
+
+            // 4. Update State
             addMessage({
                 role: nextRole,
-                content: response,
+                content: finalContent,
                 isPrivate: false
             });
 
-            // If we used a whisper, mark it handled now that the response is generated
+            // If we used a whisper, mark it handled now
             if (nextRole === 'facilitator' && activeWhisper) {
                 markMessageHandled(activeWhisper.id);
+            }
+
+            if (isClosing || shouldConclude) {
+                setStatus('completed');
+                archiveSession();
             }
 
         } catch (error: any) {
