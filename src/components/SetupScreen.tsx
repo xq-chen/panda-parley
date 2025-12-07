@@ -95,22 +95,21 @@ export const SetupScreen: React.FC = () => {
     return (
         <div className="relative w-full max-w-2xl mx-auto">
             {/* Settings Button */}
-            <div className="absolute -top-12 right-0 md:-right-12">
-                <button
-                    onClick={() => setShowSettings(true)}
-                    className="p-3 bg-white rounded-full shadow-lg text-gray-400 hover:text-panda-ink transition-all hover:scale-110"
-                    title="Configure AI Model"
-                >
-                    <Settings size={24} />
-                </button>
-            </div>
+
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="p-8 glass-panel rounded-3xl"
             >
-                <div className="text-center mb-10">
+                <div className="text-center mb-10 relative">
+                    <button
+                        onClick={() => setShowSettings(true)}
+                        className="absolute top-0 right-0 p-2 text-gray-400 hover:text-panda-ink transition-colors"
+                        title="Configure AI Model"
+                    >
+                        <Settings size={24} />
+                    </button>
                     <h1 className="text-5xl font-bold mb-4 font-display text-panda-ink">PandaParley 🐼</h1>
                     <p className="text-panda-charcoal/70 text-lg">Two AI experts. One deep inquiry. Guided by you.</p>
                 </div>
