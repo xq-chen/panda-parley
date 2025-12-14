@@ -14,15 +14,25 @@ export const DebateStage: React.FC = () => {
         }
     }, [messages]);
 
-    const ExpertCard = ({ role, align }: { role: 'expertA' | 'expertB', align: 'left' | 'right' }) => (
-        <div className={`flex flex-col items-center p-4 w-64 hidden md:flex ${align === 'left' ? 'order-first' : 'order-last'}`}>
-            <div className={`w-32 h-32 rounded-full mb-4 shadow-lg flex items-center justify-center text-4xl border-4 ${align === 'left' ? 'bg-blue-100 border-blue-300' : 'bg-red-100 border-red-300'}`}>
-                {personas[role].icon || (role === 'expertA' ? '🦄' : '🐉')}
+    const ExpertCard = ({ role, align }: { role: 'expertA' | 'expertB', align: 'left' | 'right' }) => {
+        const currentName = personas[role].name;
+        // Check collision
+        const allNames = [personas.expertA.name, personas.expertB.name, personas.facilitator.name];
+        const isDuplicate = allNames.filter(n => n === currentName).length > 1;
+        const displayName = isDuplicate
+            ? `${currentName} (${role === 'expertA' ? 'Expert A' : 'Expert B'})`
+            : currentName;
+
+        return (
+            <div className={`flex flex-col items-center p-4 w-64 hidden md:flex ${align === 'left' ? 'order-first' : 'order-last'}`}>
+                <div className={`w-32 h-32 rounded-full mb-4 shadow-lg flex items-center justify-center text-4xl border-4 ${align === 'left' ? 'bg-blue-100 border-blue-300' : 'bg-red-100 border-red-300'}`}>
+                    {personas[role].icon || (role === 'expertA' ? '🦄' : '🐉')}
+                </div>
+                <h3 className="font-bold text-xl text-center">{displayName}</h3>
+                <p className="text-xs text-center opacity-70 mt-2">{personas[role].roleDescription}</p>
             </div>
-            <h3 className="font-bold text-xl">{personas[role].name}</h3>
-            <p className="text-xs text-center opacity-70 mt-2">{personas[role].roleDescription}</p>
-        </div>
-    );
+        );
+    };
 
     return (
         <div className="flex flex-1 h-full overflow-hidden relative">

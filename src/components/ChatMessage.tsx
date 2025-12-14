@@ -18,7 +18,34 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     // ... (keep default vars)
 
     // Helper to get name safely
-    const roleName = message.role === 'user' ? 'You' : personas[message.role]?.name || message.role;
+    // Helper to get name safely with disambiguation
+    const getDisplayName = () => {
+        if (message.role === 'user') return 'You';
+
+        const currentName = personas[message.role]?.name || message.role;
+
+        // Check for name collisions
+        const allNames = [
+            personas.expertA.name,
+            personas.expertB.name,
+            personas.facilitator.name
+        ];
+
+        const isDuplicate = allNames.filter(n => n === currentName).length > 1;
+
+        if (isDuplicate) {
+            const roleLabels: Record<string, string> = {
+                expertA: 'Expert A',
+                expertB: 'Expert B',
+                facilitator: 'Facilitator'
+            };
+            return `${currentName} (${roleLabels[message.role] || message.role})`;
+        }
+
+        return currentName;
+    };
+
+    const roleName = getDisplayName();
 
     // ... logic for styles ...
 

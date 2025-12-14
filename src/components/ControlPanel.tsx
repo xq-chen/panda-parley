@@ -18,6 +18,11 @@ export const ControlPanel: React.FC = () => {
             isPrivate: true
         });
         setWhisper('');
+
+        // If discussion was completed or paused, resume it so the facilitator can respond
+        if (status === 'completed' || status === 'paused') {
+            setStatus('debating');
+        }
     };
 
     const togglePause = () => {

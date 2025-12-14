@@ -58,7 +58,7 @@ export function useDebateController() {
 
             if (nextRole === 'facilitator' && activeWhisper) {
                 // Inject the whisper into the system prompt or as a specific context injection
-                systemPrompt += `\n\n[IMPORTANT] The user whispered: "${activeWhisper.content}". Use this to guide your next output implicitly.`;
+                systemPrompt += `\n\n[IMPORTANT] The user whispered: "${activeWhisper.content}". RE-OPEN the discussion if it was closed or concluded. Use this to guide your next output implicitly. Do NOT conclude the session in this turn. Invite the experts to weigh in on this new angle.`;
 
                 // Mark as handled so we don't use it again
                 // We need to do this immediately or after success? 
