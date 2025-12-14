@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDebateStore } from '../store/debateStore';
-import { downloadAsJSON, downloadAsMarkdown } from '../utils/export';
-import { X, Trash2, Eye, FileText, Code } from 'lucide-react';
+import { downloadAsJSON, downloadAsMarkdown, downloadAsPDF } from '../utils/export';
+import { X, Trash2, Eye, FileText, Code, FileDown } from 'lucide-react';
 
 interface HistoryModalProps {
     isOpen: boolean;
@@ -71,6 +71,13 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) =
                                         title="Export Markdown"
                                     >
                                         <FileText size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => downloadAsPDF(session, `panda-parley-${session.date}`)}
+                                        className="p-2 text-gray-400 hover:text-panda-ink transition-colors"
+                                        title="Export PDF"
+                                    >
+                                        <FileDown size={18} />
                                     </button>
                                     <button
                                         onClick={() => downloadAsJSON(session, `panda-parley-${session.date}`)}

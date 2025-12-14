@@ -21,6 +21,7 @@
   "dependencies": {
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.25",
+    "jspdf": "^3.0.4",
     "lucide-react": "^0.556.0",
     "markdown-to-jsx": "^9.3.2",
     "react": "^19.2.0",
